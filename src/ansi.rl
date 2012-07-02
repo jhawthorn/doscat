@@ -14,30 +14,6 @@
 	action csi {
 		argcount = m = n = k = 0;
 	}
-	action SGR { /* SGR – Select Graphic Rendition */
-		//printf("ANSI: %i %i %c\n", n, m, fc);
-		printf("\e[%i;%i;%i%c", n, m, k, fc);
-	}
-	action SCP { /* CSI s Save Cursor position */
-		printf("\e[s");
-	}
-	action RCP { /* CSI u Restore Cursor position */
-		printf("\e[u");
-	}
-	action ED { /* Erase Data */
-		//printf("\e[2J");
-	}
-	action CURSOR { /* Cursor movement commands */
-		if(n == 0) n = 1;
-		printf("\e[%i%c", n, fc);
-	}
-	action CUP  { /* Cursor Position */
-		printf("\e[%i;%iH", n, m);
-	}
-	action ansi { /* SGR – Select Graphic Rendition */
-		//printf("ANSI: %i %i %c\n", n, m, fc);
-		printf("\e[%i;%i%c", n, m, fc);
-	}
 	action cp437_output {
 		printf("%s", cp437_to_unicode[fc]);
 	}
@@ -46,6 +22,17 @@
 	}
 	action crlf {
 		printf("\n");
+	}
+
+	action ansi {
+		printf("\e[");
+		if(argcount >= 1)
+			printf("%i", n);
+		if(argcount >= 2)
+			printf(";%i", m);
+		if(argcount >= 3)
+			printf(";%i", k);
+		printf("%c", fc);
 	}
 
 	action setn { argcount = 1; n = n * 10 + (fc - '0'); }
@@ -60,15 +47,7 @@
 	k = (';' ([0-9] @setk)*)?;
 	crlf = "\n" | "\r\n";
 
-	ansi =  csi (
-			n m k 'm' $ SGR |
-			's' $ SCP |
-			'u' $ RCP |
-			[012] 'J' $ ED |
-			n [ABCD] $ CURSOR |
-			n m [fH] $ CUP
-
-		) ;
+	ansi =  csi n m k [a-zA-Z] $ ansi;
 
 	cp437 = (0x1 .. 0x1f | 0x80 .. 0xff) -- esc -- [\r\n];
 	printable = (0x20 .. 0x7f);
