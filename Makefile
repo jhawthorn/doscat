@@ -1,7 +1,6 @@
 
 TARGET := doscat
 
-#SRCFILES := $(wildcard src/*.c)
 OBJFILES := src/main.o src/ansi.o
 DEPFILES := $(OBJFILES:%.o=%.d)
 CLEANFILES := $(CLEANFILES) $(DEPFILES) $(OBJFILES) $(TARGET)
@@ -15,10 +14,12 @@ DOT:=dot
 # User configuration
 -include config.mk
 
-CFLAGS ?= -O2 -Wall -Wextra -DNDEBUG
+CXXFLAGS ?= -g -O2 -Wall -Wextra -Weffc++ -DNDEBUG
+
+all: $(TARGET)
 
 $(TARGET): $(OBJFILES)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 -include $(DEPFILES)
 
@@ -28,11 +29,11 @@ $(TARGET): $(OBJFILES)
 %.dot: %.rl
 	$(RAGEL) $(RLFLAGS) -V -o $@ $<
 
-%.c: %.rl
+%.cc: %.rl
 	$(RAGEL) $(RLFLAGS) -C -o $@ $<
 
-%.o: %.c Makefile
-	$(CC) $(CFLAGS) -MMD -MP -MT "$*.d" -c -o $@ $<
+%.o: %.cc Makefile
+	$(CXX) $(CXXFLAGS) -MMD -MP -MT "$*.d" -c -o $@ $<
 
 view: src/ansi.png
 	meh src/ansi.png

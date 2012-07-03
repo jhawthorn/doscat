@@ -4,40 +4,28 @@
 #include <wchar.h>
 
 #include "cp437.h"
-
-#define ESC (char)(0x1b)
+#include "renderers.h"
 
 %%{
 	machine ansi;
 	alphtype unsigned char;
 
 	action csi {
-		argcount = m = n = k = 0;
+		csicount = csiargs[0] = csiargs[1] = csiargs[2] = 0;
 	}
-	action cp437_output {
-		printf("%s", cp437_to_unicode[fc]);
-	}
-	action ascii_output {
-		printf("%c", fc);
+	action char_output {
+		renderer->emit_char(fc);
 	}
 	action crlf {
-		printf("\n");
+		renderer->emit_newline();
 	}
-
 	action ansi {
-		printf("\e[");
-		if(argcount >= 1)
-			printf("%i", n);
-		if(argcount >= 2)
-			printf(";%i", m);
-		if(argcount >= 3)
-			printf(";%i", k);
-		printf("%c", fc);
+		renderer->emit_control(fc, csicount, csiargs);
 	}
 
-	action setn { argcount = 1; n = n * 10 + (fc - '0'); }
-	action setm { argcount = 2; m = m * 10 + (fc - '0'); }
-	action setk { argcount = 3; k = k * 10 + (fc - '0'); }
+	action setn { csicount = 1; csiargs[0] = csiargs[0] * 10 + (fc - '0'); }
+	action setm { csicount = 2; csiargs[1] = csiargs[1] * 10 + (fc - '0'); }
+	action setk { csicount = 3; csiargs[2] = csiargs[2] * 10 + (fc - '0'); }
 
 	esc = 0x1b;
 	csi = (esc "[") @csi;
@@ -55,8 +43,8 @@
 	valid =
 		      ansi |
 		      crlf @crlf |
-		      printable @ascii_output |
-		      cp437 @cp437_output;
+		      (printable | cp437) @char_output
+		      ;
 
 	main := (valid)*;
 }%%
@@ -69,9 +57,12 @@ int main(int argc, char *argv[]){
 	char buf[BUFSIZE];
 
 	int cs;
-	int m, n, k, argcount;
-	int sgr0, sgr1, sgr2;
-	argcount = m = n = k = sgr0 = sgr1 = sgr2 = 0;
+
+	int csiargs[3] = {0,0,0};
+	int csicount = 0;
+
+	TermRenderer *termrenderer = new TermRenderer();
+	Renderer *renderer = termrenderer;
 
 	%% write init;
 
@@ -94,6 +85,8 @@ int main(int argc, char *argv[]){
 		  return 0;
 		}
 	}
+
+	termrenderer->flush();
 
 	return 0;
 }
