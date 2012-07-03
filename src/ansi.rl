@@ -23,19 +23,17 @@
 		renderer->emit_control(fc, csicount, csiargs);
 	}
 
-	action setn { csicount = 1; csiargs[0] = csiargs[0] * 10 + (fc - '0'); }
-	action setm { csicount = 2; csiargs[1] = csiargs[1] * 10 + (fc - '0'); }
-	action setk { csicount = 3; csiargs[2] = csiargs[2] * 10 + (fc - '0'); }
+	action arginc { csicount++; }
+	action argnum { csiargs[csicount] = csiargs[csicount] * 10 + (fc - '0'); }
 
 	esc = 0x1b;
 	csi = (esc "[") @csi;
 
-	n = ([0-9] @setn)*;
-	m = (';' ([0-9] @setm)*)?;
-	k = (';' ([0-9] @setk)*)?;
+	n = (([0-9] @argnum)+ %arginc)?;
+	m = ((';' ([0-9] @argnum)*) %arginc)?;
 	crlf = "\n" | "\r\n";
 
-	ansi =  csi n m k [a-zA-Z] $ ansi;
+	ansi = csi n m m m [a-zA-Z] $ ansi;
 
 	cp437 = (0x1 .. 0x1f | 0x80 .. 0xff) -- esc -- [\r\n];
 	printable = (0x20 .. 0x7f);
@@ -58,7 +56,7 @@ int main(int argc, char *argv[]){
 
 	int cs;
 
-	int csiargs[3] = {0,0,0};
+	int csiargs[4] = {0,0,0,0};
 	int csicount = 0;
 
 	TermRenderer *termrenderer = new TermRenderer();
@@ -68,8 +66,7 @@ int main(int argc, char *argv[]){
 
 	const unsigned char *p;
 	const unsigned char *pe;
-	while(fgets(buf, 2, stdin)){
-		//printf("%c (0x%.2x)\n", buf[0], buf[0]);
+	while(fgets(buf, sizeof(buf), stdin)){
 		int oldstate = cs;
 		p  = (unsigned char *)buf;
 		pe = (unsigned char *)buf + strlen(buf);
