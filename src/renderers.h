@@ -1,8 +1,11 @@
 #ifndef RENDERER_H
 #define RENDERER_H RENDERER_H
 
+#include <cstdio>
 #include <vector>
 #include <limits.h>
+
+#include "cp437.h"
 
 #define DEFAULT(V, D) ((V) ? (V) : (D))
 
@@ -95,7 +98,7 @@ class TermRenderer: public Renderer {
 	}
 
 	public:
-		TermRenderer(): position(), saved_position(), term(), attr(), width(INT_MAX){
+		TermRenderer(): position(), saved_position(), term(), attr(), width(80){
 		}
 		void emit_char(unsigned char fc){
 			term[position.row][position.col].c = fc;

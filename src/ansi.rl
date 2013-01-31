@@ -1,7 +1,7 @@
 
-#include <string.h>
-#include <stdio.h>
-#include <wchar.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
 #include "cp437.h"
 #include "renderers.h"
@@ -51,7 +51,7 @@
 
 #define BUFSIZE 2048
 
-int main(int argc, char *argv[]){
+void parse(Renderer *renderer, FILE *file){
 	char buf[BUFSIZE];
 
 	int cs;
@@ -59,14 +59,11 @@ int main(int argc, char *argv[]){
 	int csiargs[4] = {0,0,0,0};
 	int csicount = 0;
 
-	TermRenderer *termrenderer = new TermRenderer();
-	Renderer *renderer = termrenderer;
-
 	%% write init;
 
 	const unsigned char *p;
 	const unsigned char *pe;
-	while(fgets(buf, sizeof(buf), stdin)){
+	while(fgets(buf, sizeof(buf), file)){
 		int oldstate = cs;
 		p  = (unsigned char *)buf;
 		pe = (unsigned char *)buf + strlen(buf);
@@ -74,17 +71,16 @@ int main(int argc, char *argv[]){
 		fflush(stdout);
 
 		if(cs == 0){
-		  fflush(stdout);
-		  fprintf(stderr, "\n\n\n\n\n\n\n\n\n");
-		  fprintf(stderr, "error parsing: reached character %li\n", (p - (unsigned char *)buf));
-		  fprintf(stderr, "state was: %i\n", oldstate);
-		  fprintf(stderr, "char was: '%c' (0x%.2x)\n", *p, *p);
-		  return 0;
+			fflush(stdout);
+			fprintf(stderr, "\n\n\n\n\n\n\n\n\n");
+			fprintf(stderr, "error parsing: reached character %li\n", (p - (unsigned char *)buf));
+			fprintf(stderr, "state was: %i\n", oldstate);
+			fprintf(stderr, "char was: '%c' (0x%.2x)\n", *p, *p);
+			abort();
 		}
 	}
 
-	termrenderer->flush();
 
-	return 0;
 }
+
 

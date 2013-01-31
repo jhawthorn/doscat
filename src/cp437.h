@@ -1,3 +1,5 @@
+#ifndef CP437_H
+#define CP437_H
 
 static const char *cp437_to_unicode[256] = {
 	/* 0x00 */ (char[]){'\0'},
@@ -258,3 +260,4 @@ static const char *cp437_to_unicode[256] = {
 	/* 0xff */ (char[]){(char)194,(char)160, '\0'}
 };
 
+#endif

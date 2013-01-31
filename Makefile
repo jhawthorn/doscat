@@ -1,9 +1,8 @@
 
 TARGET := doscat
 
-OBJFILES := src/main.o src/ansi.o
+OBJFILES := src/doscat.o src/ansi.o
 DEPFILES := $(OBJFILES:%.o=%.d)
-CLEANFILES := $(CLEANFILES) $(DEPFILES) $(OBJFILES) $(TARGET)
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
 
@@ -43,7 +42,7 @@ install:
 
 # Clean
 clean:
-	$(RM) src/*.o src/*.d src/*.png
+	$(RM) src/*.o src/*.d src/*.png $(TARGET)
 
 .PHONY: clean
 
