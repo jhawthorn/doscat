@@ -1,7 +1,7 @@
 
 TARGET := doscat
 
-OBJFILES := src/doscat.o src/ansi.o
+OBJFILES := src/doscat.o src/ansi.o src/raw_renderer.o src/term_renderer.o
 DEPFILES := $(OBJFILES:%.o=%.d)
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin

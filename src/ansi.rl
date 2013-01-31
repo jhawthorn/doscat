@@ -68,7 +68,6 @@ void parse(Renderer *renderer, FILE *file){
 		p  = (unsigned char *)buf;
 		pe = (unsigned char *)buf + strlen(buf);
 		%% write exec;
-		fflush(stdout);
 
 		if(cs == 0){
 			fflush(stdout);
